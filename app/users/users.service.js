@@ -10,7 +10,10 @@ app.factory("Users", function($firebaseArray,$firebaseObject, FirebaseUrl){
     getDisplayName: function(uid) {
       return users.$getRecord(uid).displayName;
     },
-    all: users
+    all: users,
+    getGravatar: function(uid){
+  return '//www.gravatar.com/avatar/' + users.$getRecord(uid).emailHash;
+},
   };
 
   return Users;
