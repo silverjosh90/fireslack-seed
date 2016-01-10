@@ -1,8 +1,7 @@
-var app = angular.module('angularfireSlackApp')
+angular.module('angularfireSlackApp')
+  .factory('Channels', function($firebaseArray, FirebaseUrl){
+    var ref = new Firebase(FirebaseUrl+'channels');
+    var channels = $firebaseArray(ref);
 
-app.factory("Channels", function($firebaseArray, FirebaseUrl){
-  var ref = new Firebase(FirebaseUrl+'channels');
-  var channels = $firebaseArray(ref);
-
-  return channels;
-});
+    return channels;
+  });

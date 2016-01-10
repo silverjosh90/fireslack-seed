@@ -1,9 +1,9 @@
 {
-  "firebase": "gslack",
-  "public": "public",
+  "firebase": "gslacks",
+  "public": "dist",
   "ignore": [
-    "firebase.json",
-    "**/.*",
-    "**/node_modules/**"
-  ]
+  "firebase.json",
+  "**/.*",
+  "**/node_modules/**"
+]
 }

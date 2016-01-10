@@ -14,34 +14,44 @@ angular
     'angular-md5',
     'ui.router'
   ])
-  .config(function ($stateProvider, $urlRouterProvider) {
+  .config(function($stateProvider, $urlRouterProvider) {
     $stateProvider
       .state('home', {
         url: '/',
-        templateUrl: 'home/home.html'
+        templateUrl: 'home/home.html',
+        resolve: {
+    requireNoAuth: function($state, Auth){
+      return Auth.$requireAuth().then(function(auth){
+        $state.go('channels');
+      }, function(error){
+        return;
+      });
+    }
+  }
       })
       .state('login', {
         url: '/login',
         controller: "AuthCtrl as authCtrl",
+        templateUrl: 'auth/login.html',
         resolve: {
-  requireNoAuth: function($state, Auth){
-    return Auth.$requireAuth().then(function(auth){
-      $state.go('home');
-    }, function(error){
-      return;
-    });
-  }
-},
-        templateUrl: 'auth/login.html'
+          requireNoAuth: function($state, Auth) {
+            return Auth.$requireAuth().then(function(auth) {
+              var userEmail = auth.password.email;
+              $state.go('home');
+            }, function(error) {
+              return;
+            });
+          }
+        }
       })
       .state('register', {
         url: '/register',
         controller: "AuthCtrl as authCtrl",
         templateUrl: 'auth/register.html',
-        requireNoAuth: function($state, Auth){
-          return Auth.$requireAuth().then(function(auth){
+        requireNoAuth: function($state, Auth) {
+          return Auth.$requireAuth().then(function(auth) {
             $state.go('home');
-          }, function(error){
+          }, function(error) {
             return;
           });
         }
@@ -52,40 +62,78 @@ angular
         templateUrl: 'users/profile.html',
         resolve: {
           auth: function($state, Users, Auth) {
-            return Auth.$requireAuth().catch(function(){
+            return Auth.$requireAuth().catch(function() {
               $state.go('home');
             });
           },
           profile: function(Users, Auth) {
-            return Auth.$requireAuth().then(function(auth){
+            return Auth.$requireAuth().then(function(auth) {
               return Users.getProfile(auth.uid).$loaded();
             });
           }
         }
       })
-
       .state('channels', {
-        url: '/channels',
+        url: "/channels",
         resolve: {
-          channels: function(Channels) {
+          channels: function (Channels){
             return Channels.$loaded();
           },
-          profile: function($state,Auth,Users){
+          profile: function ($state, Auth, Users){
             return Auth.$requireAuth().then(function(auth){
-              return Users.getProfile(auth.iud).$loaded().then(function(profile){
+              return Users.getProfile(auth.uid).$loaded().then(function (profile){
                 if(profile.displayName){
                   return profile;
                 } else {
-                  $state.go("profile");
+                  $state.go('profile');
                 }
               });
             }, function(error){
               $state.go('home');
             });
           }
-        }
+        },
+        controller: 'ChannelsCtrl as channelsCtrl',
+        templateUrl: 'channels/index2.html'
       })
+      .state('channels.create', {
+        url: '/create',
+        templateUrl: 'channels/create.html',
+        controller: 'ChannelsCtrl as channelsCtrl'
+      })
+
+      .state('channels.messages', {
+        url: '/{channelId}/messages',
+        resolve: {
+          messages: function($stateParams, Messages) {
+            return Messages.forChannel($stateParams.channelId).$loaded();
+          },
+          channelName: function($stateParams, channels){
+            return '#'+channels.$getRecord($stateParams.channelId).name;
+          }
+        },
+        templateUrl: 'channels/messages.html',
+controller: 'MessagesCtrl as messagesCtrl'
+
+      })
+
+
+      .state('channels.direct', {
+        url: '/{uid}/messages/direct',
+        templateUrl: 'channels/messages.html',
+        controller: 'MessagesCtrl as messagesCtrl',
+        resolve: {
+          messages: function($stateParams, Messages, profile){
+            return Messages.forUsers($stateParams.uid, profile.$id).$loaded();
+          },
+          channelName: function($stateParams, Users){
+            return Users.all.$loaded().then(function(){
+              return '@'+Users.getDisplayName($stateParams.uid);
+            });
+          }
+        }
+      });
 
     $urlRouterProvider.otherwise('/');
   })
-  .constant('FirebaseUrl', 'https://gslack.firebaseio.com/');
+  .constant('FirebaseUrl', 'https://gslacks.firebaseapp.com/');
