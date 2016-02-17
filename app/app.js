@@ -8,8 +8,7 @@
  *
  * Main module of the application.
  */
-angular
-  .module('angularfireSlackApp', [
+angular.module('angularfireSlackApp', [
     'firebase',
     'angular-md5',
     'ui.router'
@@ -136,4 +135,4 @@ controller: 'MessagesCtrl as messagesCtrl'
 
     $urlRouterProvider.otherwise('/');
   })
-  .constant('FirebaseUrl', 'https://gslacks.firebaseapp.com/');
+  .constant('FirebaseUrl', 'https://gslacks.firebaseio.com/');

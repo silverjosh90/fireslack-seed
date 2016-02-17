@@ -1,4 +1,4 @@
-app = angular.module('angularfireSlackApp')
+app = angular.module('angularfireSlackApp', ['luegg.directives'])
   app.controller('MessagesCtrl', function(profile, channelName, messages){
     var messagesCtrl = this;
     messagesCtrl.messages = messages;
